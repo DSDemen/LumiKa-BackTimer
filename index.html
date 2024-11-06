@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ждем LumiKa</title>
+<link rel="icon" type="image/png" href="LumiKa.png">
+<style>
+    body {
+        background-color: lightblue;
+        margin: 0;
+        padding: 0;
+        font-family: 'my1', Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+    }
+    #header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1000;
+    }
+    #logo {
+        width: 100px;
+        height: auto;
+    }
+    #randomText {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    #countdown {
+        font-size: 50px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    #playButton {
+        font-size: 20px;
+        padding: 10px 20px;
+        cursor: pointer;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    #playButton:hover {
+        background-color: #45a049;
+    }
+    #volumeControl {
+        width: 150px;
+        margin-top: 10px;
+    }
+
+    @font-face {
+        font-family: 'my1';
+        src: url('my1.ttf') format('truetype');
+    }
+
+    #menu {
+        position: fixed;
+        top: 0;
+        right: -300px;
+        width: 300px;
+        height: 100%;
+        background-color: #808080;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        transition: right 0.3s ease;
+        z-index: 1001;
+    }
+
+    #menuButton {
+        cursor: pointer;
+        font-size: 30px;
+        padding: 5px;
+    }
+
+    .menuItem {
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+        cursor: pointer;
+    }
+
+    .menuItem:hover {
+        background-color: #999999;
+    }
+</style>
+</head>
+<body>
+
+<div id="header">
+    <img id="logo" src="LumiKa.png" alt="Логотип">
+    <div id="menuButton">&#9776;</div>
+</div>
+
+<div id="randomText"></div>
+<div id="countdown"></div>
+
+<!-- Кнопка для проигрывания музыки -->
+<button id="playButton">Проиграть музыку</button>
+
+<!-- Ползунок для регулировки громкости -->
+<input id="volumeControl" type="range" min="0" max="1" step="0.01" value="0.5">
+
+<div id="menu">
+    <div class="menuItem" id="button1">LumiKa World Map</div>
+</div>
+
+<script>
+// Массив текстов для рандомного выбора
+var texts = [
+    "Ожидание!",
+    "Всё дальше от цели!",
+    "LumiKa почти здесь!(сарказм)",
+    "LumiKa....",
+    "Осталось 9 9 9 99999999.....!",
+    "Время отдаляется...",
+    "Сайт поддержан не открытием сервера!",
+    "А вы знали что сервер откроется через:",
+    "Настоящий таймер открытия:",
+    "Привет!",
+    "Сайт поддержан Илоном Максом",
+    "JaZemla......"
+];
+
+// Функция для смены текста каждые 10 секунд
+function updateRandomText() {
+    var randomIndex = Math.floor(Math.random() * texts.length);
+    document.getElementById("randomText").innerHTML = texts[randomIndex];
+}
+
+// Запуск смены текста
+updateRandomText();
+setInterval(updateRandomText, 10000);
+
+// Установка даты начала
+var startDate = new Date("September 22, 2024 00:00:00").getTime();
+
+// Обновление таймера каждую секунду
+setInterval(function() {
+  var now = new Date().getTime();
+  var distance = now - startDate;
+
+  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+  var daysWord = ["день", "дня", "дней"][days % 10 == 1 && days % 100 != 11 ? 0 : (days % 10 >= 2 && days % 10 <= 4 && !(days % 100 >= 12 && days % 100 <= 14)) ? 1 : 2];
+  var hoursWord = ["час", "часа", "часов"][hours % 10 == 1 && hours % 100 != 11 ? 0 : (hours % 10 >= 2 && hours % 10 <= 4 && !(hours % 100 >= 12 && hours % 100 <= 14)) ? 1 : 2];
+  var minutesWord = ["минута", "минуты", "минут"][minutes % 10 == 1 && minutes % 100 != 11 ? 0 : (minutes % 10 >= 2 && minutes % 10 <= 4 && !(minutes % 100 >= 12 && minutes % 100 <= 14)) ? 1 : 2];
+  var secondsWord = ["секунда", "секунды", "секунд"][seconds % 10 == 1 && seconds % 100 != 11 ? 0 : (seconds % 10 >= 2 && seconds % 10 <= 4 && !(seconds % 100 >= 12 && seconds % 100 <= 14)) ? 1 : 2];
+
+  document.getElementById("countdown").innerHTML = "Прошло " + days + " " + daysWord + " " + hours + " " + hoursWord + " " + minutes + " " + minutesWord + " " + seconds + " " + secondsWord;
+    
+}, 1000);
+
+// Открытие/закрытие меню
+document.getElementById("menuButton").addEventListener("click", function() {
+    var menu = document.getElementById("menu");
+    menu.style.right = (menu.style.right === "0px") ? "-300px" : "0px";
+});
+
+// Открытие/закрытие меню
+document.getElementById("menu").addEventListener("click", function() {
+    var menu = document.getElementById("menu");
+    menu.style.right = (menu.style.right === "0px") ? "-300px" : "0px";
+});
+
+// Переход по кнопке в меню
+document.getElementById("button1").addEventListener("click", function() {
+    window.location.href = "http://map.lumika.su:8080/";
+});
+
+// Добавление аудиоплеера и кнопки воспроизведения
+var audio = new Audio('sl.mp3');
+audio.volume = 0.5; // Начальная громкость
+
+document.getElementById("playButton").addEventListener("click", function() {
+    if (audio.paused) {
+        audio.play();
+        this.innerHTML = "Пауза";
+    } else {
+        audio.pause();
+        this.innerHTML = "Проиграть музыку";
+    }
+});
+
+// Управление громкостью
+document.getElementById("volumeControl").addEventListener("input", function() {
+    audio.volume = this.value;
+});
+</script>
+
+</body>
+</html>
