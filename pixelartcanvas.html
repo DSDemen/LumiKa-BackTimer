@@ -1,19 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LumiKa Pixel Art Canvas</title>
+  <link rel="icon" type="image/png" href="LumiKa.png">
   <style>
-    canvas { border: 1px solid black; cursor: pointer; }
-    #toolbar { margin-top: 10px; }
+    /* General body style to match the first page */
+    body {
+      background-color: lightblue;
+      margin: 0;
+      padding: 0;
+      font-family: 'my1', Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    
+    /* Header to match first page style */
+    #header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      background-color: lightblue; /* Transparent background */
+    }
+    
+    #logo {
+      width: 100px;
+      height: auto;
+    }
+    
+    /* Canvas styling */
+    canvas {
+      border: 2px solid black;
+      cursor: pointer;
+      margin-top: 60px; /* Adjust for header space */
+    }
+
+    /* Toolbar to match overall theme */
+    #toolbar {
+      margin-top: 10px;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 15px;
+      border-radius: 8px;
+      color: white;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Input elements styling */
+    input[type="color"], select {
+      padding: 5px;
+      margin: 5px;
+      border-radius: 5px;
+    }
+
+    select {
+      width: 80px;
+    }
+
+    /* Custom font for headings */
+    @font-face {
+      font-family: 'my1';
+      src: url('my1.ttf') format('truetype');
+    }
+
+    /* Mobile-friendly */
+    @media (max-width: 600px) {
+      canvas {
+        width: 90vw;
+        height: 90vw;
+      }
+      #toolbar {
+        width: 100%;
+      }
+    }
+
   </style>
 </head>
 <body>
+  <!-- Header with logo and menu button (matches the first page) -->
+  <div id="header">
+    <img id="logo" src="LumiKa.png" alt="Логотип">
+  </div>
+
   <h1>LumiKa Online Pixel Canvas</h1>
   <canvas id="pixelCanvas" width="500" height="500"></canvas>
   
-  <!-- Панель инструментов -->
+  <!-- Tool panel for color and brush size selection -->
   <div id="toolbar">
     <label for="colorPicker">Выберите цвет:</label>
     <input type="color" id="colorPicker" value="#000000">
@@ -55,11 +137,11 @@
     const colorPicker = document.getElementById('colorPicker');
     const brushSizeSelect = document.getElementById('brushSize');
     let brushSize = parseInt(brushSizeSelect.value, 10);
-    const pixelSize = 10;  // Размер одного пикселя в базовой сетке
+    const pixelSize = 10;  // Size of one pixel in the grid
 
-    let isDrawing = false;  // Переменная для отслеживания состояния рисования
+    let isDrawing = false;
 
-    // Функция для рисования пикселя с заданной толщиной
+    // Draw a pixel with the selected color and size
     function drawPixel(x, y, color, size) {
       ctx.fillStyle = color;
       for (let dx = 0; dx < size; dx++) {
@@ -69,7 +151,7 @@
       }
     }
 
-    // Функция для записи пикселя в Firebase
+    // Save pixel data to Firebase
     function savePixelToDatabase(x, y, color, size) {
       for (let dx = 0; dx < size; dx++) {
         for (let dy = 0; dy < size; dy++) {
@@ -78,58 +160,58 @@
       }
     }
 
-    // Начать рисование
+    // Start drawing when mouse is pressed
     canvas.addEventListener('mousedown', (event) => {
       isDrawing = true;
       handleDrawing(event);
     });
 
-    // Рисовать при перемещении мыши
+    // Draw when mouse is moved
     canvas.addEventListener('mousemove', (event) => {
       if (isDrawing) {
         handleDrawing(event);
       }
     });
 
-    // Остановить рисование
+    // Stop drawing when mouse is released
     canvas.addEventListener('mouseup', () => {
       isDrawing = false;
     });
-    
-    // Остановить рисование, если мышь вышла за пределы канваса
+
+    // Stop drawing when mouse leaves canvas
     canvas.addEventListener('mouseleave', () => {
       isDrawing = false;
     });
 
-    // Обработчик выбора толщины кисти
+    // Handle brush size change
     brushSizeSelect.addEventListener('change', () => {
       brushSize = parseInt(brushSizeSelect.value, 10);
     });
 
-    // Функция для обработки рисования
+    // Handle drawing logic
     function handleDrawing(event) {
       const rect = canvas.getBoundingClientRect();
       const x = Math.floor((event.clientX - rect.left) / pixelSize);
       const y = Math.floor((event.clientY - rect.top) / pixelSize);
       const color = colorPicker.value;
 
-      // Рисуем и сохраняем пиксель в Firebase
+      // Draw and save pixel to Firebase
       drawPixel(x, y, color, brushSize);
       savePixelToDatabase(x, y, color, brushSize);
     }
 
-    // Слушаем изменения в Firebase и обновляем канвас
+    // Listen for new pixels in Firebase and update canvas
     db.ref('pixels').on('child_added', (snapshot) => {
       const { x, y, color } = snapshot.val();
-      drawPixel(x, y, color, 1); // Рисуем каждый пиксель по одному
+      drawPixel(x, y, color, 1);
     });
 
     db.ref('pixels').on('child_changed', (snapshot) => {
       const { x, y, color } = snapshot.val();
-      drawPixel(x, y, color, 1); // Рисуем каждый пиксель по одному
+      drawPixel(x, y, color, 1);
     });
 
-    // При загрузке страницы получаем все пиксели из Firebase и рисуем их
+    // Load existing pixels from Firebase when page loads
     db.ref('pixels').once('value', (snapshot) => {
       snapshot.forEach((childSnapshot) => {
         const { x, y, color } = childSnapshot.val();
