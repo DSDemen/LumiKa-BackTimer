@@ -114,6 +114,7 @@
 
 <div id="menu">
     <div class="menuItem" id="button1">LumiKa World Map</div>
+    <div class="menuItem" id="button2">LumiKa Online Pixel Art</div>
 </div>
 
 <script>
@@ -180,6 +181,10 @@ document.getElementById("menu").addEventListener("click", function() {
 // Переход по кнопке в меню
 document.getElementById("button1").addEventListener("click", function() {
     window.location.href = "http://map.lumika.su:8080/";
+});
+
+document.getElementById("button2").addEventListener("click", function() {
+    window.location.href='pixelartcanvas.html';
 });
 
 // Добавление аудиоплеера и кнопки воспроизведения

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LumiKa Pixel Art Canvas</title>
+  <style>
+    canvas { border: 1px solid black; cursor: pointer; }
+    #toolbar { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>LumiKa Online Pixel Canvas</h1>
+  <canvas id="pixelCanvas" width="500" height="500"></canvas>
+  
+  <!-- Панель инструментов -->
+  <div id="toolbar">
+    <label for="colorPicker">Выберите цвет:</label>
+    <input type="color" id="colorPicker" value="#000000">
+    
+    <label for="brushSize">Толщина кисти:</label>
+    <select id="brushSize">
+      <option value="1">1x1</option>
+      <option value="2">2x2</option>
+      <option value="4">4x4</option>
+      <option value="6">6x6</option>
+    </select>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-storage-compat.js"></script>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB0P-DXZOTfhP96mn4pyMh0c4O7CEarLck",
+        authDomain: "tests-2c93b.firebaseapp.com",
+        databaseURL: "https://tests-2c93b-default-rtdb.firebaseio.com",
+        projectId: "tests-2c93b",
+        storageBucket: "tests-2c93b.appspot.com",
+        messagingSenderId: "801648128815",
+        appId: "1:801648128815:web:1dc889b78a022f449ee7da",
+        measurementId: "G-LZXKH4MPSY"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const canvas = document.getElementById('pixelCanvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    const brushSizeSelect = document.getElementById('brushSize');
+    let brushSize = parseInt(brushSizeSelect.value, 10);
+    const pixelSize = 10;  // Размер одного пикселя в базовой сетке
+
+    let isDrawing = false;  // Переменная для отслеживания состояния рисования
+
+    // Функция для рисования пикселя с заданной толщиной
+    function drawPixel(x, y, color, size) {
+      ctx.fillStyle = color;
+      for (let dx = 0; dx < size; dx++) {
+        for (let dy = 0; dy < size; dy++) {
+          ctx.fillRect((x + dx) * pixelSize, (y + dy) * pixelSize, pixelSize, pixelSize);
+        }
+      }
+    }
+
+    // Функция для записи пикселя в Firebase
+    function savePixelToDatabase(x, y, color, size) {
+      for (let dx = 0; dx < size; dx++) {
+        for (let dy = 0; dy < size; dy++) {
+          db.ref(`pixels/${x + dx}_${y + dy}`).set({ x: x + dx, y: y + dy, color });
+        }
+      }
+    }
+
+    // Начать рисование
+    canvas.addEventListener('mousedown', (event) => {
+      isDrawing = true;
+      handleDrawing(event);
+    });
+
+    // Рисовать при перемещении мыши
+    canvas.addEventListener('mousemove', (event) => {
+      if (isDrawing) {
+        handleDrawing(event);
+      }
+    });
+
+    // Остановить рисование
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+    });
+    
+    // Остановить рисование, если мышь вышла за пределы канваса
+    canvas.addEventListener('mouseleave', () => {
+      isDrawing = false;
+    });
+
+    // Обработчик выбора толщины кисти
+    brushSizeSelect.addEventListener('change', () => {
+      brushSize = parseInt(brushSizeSelect.value, 10);
+    });
+
+    // Функция для обработки рисования
+    function handleDrawing(event) {
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((event.clientX - rect.left) / pixelSize);
+      const y = Math.floor((event.clientY - rect.top) / pixelSize);
+      const color = colorPicker.value;
+
+      // Рисуем и сохраняем пиксель в Firebase
+      drawPixel(x, y, color, brushSize);
+      savePixelToDatabase(x, y, color, brushSize);
+    }
+
+    // Слушаем изменения в Firebase и обновляем канвас
+    db.ref('pixels').on('child_added', (snapshot) => {
+      const { x, y, color } = snapshot.val();
+      drawPixel(x, y, color, 1); // Рисуем каждый пиксель по одному
+    });
+
+    db.ref('pixels').on('child_changed', (snapshot) => {
+      const { x, y, color } = snapshot.val();
+      drawPixel(x, y, color, 1); // Рисуем каждый пиксель по одному
+    });
+
+    // При загрузке страницы получаем все пиксели из Firebase и рисуем их
+    db.ref('pixels').once('value', (snapshot) => {
+      snapshot.forEach((childSnapshot) => {
+        const { x, y, color } = childSnapshot.val();
+        drawPixel(x, y, color, 1);
+      });
+    });
+  </script>
+</body>
+</html>
