@@ -7,6 +7,8 @@
 <link rel="icon" type="image/png" href="LumiKa.png">
 <style>
     body {
+        background: url('slide1.png') no-repeat center center fixed;
+        background-size: cover;
         background-color: lightblue;
         margin: 0;
         padding: 0;
@@ -16,6 +18,7 @@
         align-items: center;
         height: 100vh;
         flex-direction: column;
+        transition: background-image 2s ease-in-out; /* Плавный переход */
     }
     #header {
         position: fixed;
@@ -118,6 +121,30 @@
 </div>
 
 <script>
+    // Массив изображений для слайд-шоу
+    const slides = [
+        'slide1.png',
+        'slide2.png',
+        'slide3.png',
+        'slide4.png',
+        'slide5.png',
+        'slide6.png',
+        'slide7.png',
+        'slide8.png'
+    ];
+
+    let currentSlide = 0;
+
+    function changeSlide() {
+        // Устанавливаем новое изображение на фон
+        document.body.style.backgroundImage = `url('${slides[currentSlide]}')`;
+        
+        // Переход к следующему изображению в массиве
+        currentSlide = (currentSlide + 1) % slides.length;
+    }
+
+    // Запуск смены изображения каждые 5 секунд
+    setInterval(changeSlide, 5000);
 // Массив текстов для рандомного выбора
 var texts = [
     "Ожидание!",
